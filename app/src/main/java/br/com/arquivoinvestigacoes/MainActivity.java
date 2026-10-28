@@ -3,16 +3,22 @@ package br.com.arquivoinvestigacoes;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.graphics.Insets;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import android.widget.FrameLayout;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -43,7 +49,25 @@ public class MainActivity extends Activity {
         super.onCreate(b);
         t0 = SystemClock.elapsedRealtime();
         web = new WebView(this);
-        setContentView(web);
+        // Desde o Android 15 o app ocupa a tela toda, por trás das barras do sistema.
+        // Este contêiner deixa a página só na área livre (sem ficar embaixo dos botões de navegação).
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(0xFF1B1410);
+        root.addView(web, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        setContentView(root);
+        root.setOnApplyWindowInsetsListener((v, in) -> {
+            int l, t, r, b;
+            if (Build.VERSION.SDK_INT >= 30) {
+                Insets sb = in.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                Insets ime = in.getInsets(WindowInsets.Type.ime());
+                l = sb.left; t = sb.top; r = sb.right; b = Math.max(sb.bottom, ime.bottom);
+            } else {
+                l = in.getSystemWindowInsetLeft(); t = in.getSystemWindowInsetTop();
+                r = in.getSystemWindowInsetRight(); b = in.getSystemWindowInsetBottom();
+            }
+            v.setPadding(l, t, r, b);
+            return Build.VERSION.SDK_INT >= 30 ? WindowInsets.CONSUMED : in.consumeSystemWindowInsets();
+        });
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
