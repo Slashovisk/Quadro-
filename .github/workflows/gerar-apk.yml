@@ -1,0 +1,49 @@
+name: Gerar APK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Compilar
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Preparar arquivos
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk "Arquivo-de-Investigacoes-1.0.${{ github.run_number }}.apk"
+          # nome fixo: o link .../releases/latest/download/Arquivo-de-Investigacoes.apk sempre baixa a versão mais nova
+          cp app/build/outputs/apk/debug/app-debug.apk Arquivo-de-Investigacoes.apk
+
+      - name: Publicar versão
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: Arquivo de Investigações 1.0.${{ github.run_number }}
+          make_latest: true
+          body: |
+            **Baixar no celular:** toque em `Arquivo-de-Investigacoes.apk` abaixo e abra o arquivo baixado.
+            Na primeira vez, o Android pede para permitir "instalar de fontes desconhecidas".
+            Esta versão instala por cima da anterior sem apagar os quadros.
+
+            Alteração: ${{ github.event.head_commit.message || 'build manual' }}
+          files: |
+            Arquivo-de-Investigacoes.apk
+            Arquivo-de-Investigacoes-1.0.${{ github.run_number }}.apk
