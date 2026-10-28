@@ -56,16 +56,16 @@ public class MainActivity extends Activity {
         root.addView(web, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setContentView(root);
         root.setOnApplyWindowInsetsListener((v, in) -> {
-            int l, t, r, b;
+            int pl, pt, pr, pb;
             if (Build.VERSION.SDK_INT >= 30) {
                 Insets sb = in.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
                 Insets ime = in.getInsets(WindowInsets.Type.ime());
-                l = sb.left; t = sb.top; r = sb.right; b = Math.max(sb.bottom, ime.bottom);
+                pl = sb.left; pt = sb.top; pr = sb.right; pb = Math.max(sb.bottom, ime.bottom);
             } else {
-                l = in.getSystemWindowInsetLeft(); t = in.getSystemWindowInsetTop();
-                r = in.getSystemWindowInsetRight(); b = in.getSystemWindowInsetBottom();
+                pl = in.getSystemWindowInsetLeft(); pt = in.getSystemWindowInsetTop();
+                pr = in.getSystemWindowInsetRight(); pb = in.getSystemWindowInsetBottom();
             }
-            v.setPadding(l, t, r, b);
+            v.setPadding(pl, pt, pr, pb);
             return Build.VERSION.SDK_INT >= 30 ? WindowInsets.CONSUMED : in.consumeSystemWindowInsets();
         });
 
